@@ -9,10 +9,10 @@ def square_detection(row, column, game_size):
     row_mod = row % game_size
     column_mod = column % game_size
 
-    square[0] = row - row_mod  # min x
-    square[1] = column - column_mod  # min y
-    square[2] = square[0] + game_size - 1  # max x
-    square[3] = square[1] + game_size - 1  # max y
+    square[0] = row - row_mod  # min y
+    square[1] = column - column_mod  # min x
+    square[2] = square[0] + game_size - 1  # max y
+    square[3] = square[1] + game_size - 1  # max x
 
     return square
 
@@ -106,43 +106,50 @@ def create_game_matrix_solution2(game_size):
     for cell_x in range(size):
         matrix_row = []
         for cell_y in range(size):
-            matrix_row.append("")
+            matrix_row.append("x")
         game_matrix.append(matrix_row)
     x = 0
     y = 0
-    number_of_squares = 0
     exclude_num = [0]
-    while number_of_squares < size:
-        print(f"I'm inside while number_of_squares!")
+    extra_attempts = 0
+    new_square = False
+    while game_matrix[size-1][size-1] == "x":
+        print(f"I'm inside while!")
         num_not_in_place = True
+        if new_square:
+            attempts = 0
+            extra_attempts = 0
+            new_square = False
 
         num = random.choice([z for z in range(1, size + 1) if z not in exclude_num])
+        attempts = 0
         while num_not_in_place:
             square_location = square_detection(y, x, game_size)
             print(f"I'm inside while num_not_in_place!")
 
-            if not square_protection(num,y,x,game_matrix,game_size) and not column_protection(num,y,game_matrix) and not column_protection(num,x,game_matrix):
+            if not square_protection(num,y,x,game_matrix,game_size) and not row_protection(num,game_matrix[y]) and not column_protection(num,x,game_matrix):
                 print(f"I'm inside if not!")
                 num_not_in_place = False
                 game_matrix[y][x] = num
                 exclude_num.append(num)
-                #TODO Problem is somewhere here. when square whats to do second (1)
-                # row in second square it jumps back into the first square
+
                 if y == square_location[2] and x == square_location[3]:
-                    number_of_squares = number_of_squares + 1
-                    if square_location[2] == size - 1:
+                    if square_location[3] == size - 1:
                         y = square_location[2] + 1
                         x = 0
                         exclude_num = [0]
+                        new_square = True
 
                     else:
-                        y = square_location[1]
+                        y = square_location[0]
                         x = square_location[3] + 1
                         exclude_num = [0]
+                        new_square = True
+
                 # Might seem like a stupid idea, but not exclude_num == [0]
                 # actually tells this function if we want to change square or not
                 if x == square_location[3] and not exclude_num == [0]:
-                    x = 0
+                    x = square_location[1]
                     y = y + 1
                 elif not exclude_num == [0]:
                     x = x + 1
@@ -150,7 +157,24 @@ def create_game_matrix_solution2(game_size):
                 # We are not excluding the not suitable number because it could work on another row or column
                 #TODO: Add special exclude list for each protection
                 num = random.choice([z for z in range(1, size + 1) if z not in exclude_num])
+                attempts = attempts + 1
+                if attempts > size * 3:
+                    for i in range(square_location[0], square_location[2] + 1):
+                        for j in range(square_location[1], square_location[3] + 1):
+                            game_matrix[i][j] = "x"
+                            x = square_location[1]
+                            y = square_location[0]
+                    attempts = 0
+                    extra_attempts = extra_attempts + 1
+                    if extra_attempts > size:
 
+                        for i in range(square_location[0], square_location[2] + 1):
+                            for j in range(size):
+                                game_matrix[i][j] = "x"
+                                x = 0
+                                y = square_location[0]
+                        extra_attempts = 0
+                    exclude_num = [0]
 
     return game_matrix
 
@@ -199,38 +223,32 @@ def create_game_matrix(solution_matrix, mode):
 
     return solution_matrix
 
-
-
-    return game
-
+#TODO: comment
 def show_game_matrix(game_matrix, gamesize):
-    # Převeď na numpy array pro snadnější manipulaci
+
     np_game_matrix = np.array(game_matrix, dtype=object)
     radky, sloupce = np_game_matrix.shape
 
-    # Vytvoř figuru a osu
     fig, ax = plt.subplots()
     ax.set_xlim(0, sloupce)
     ax.set_ylim(0, radky)
-    ax.invert_yaxis()  # Aby řádky šly shora dolů jako v listu
+    ax.invert_yaxis()
 
-    # Nakresli horizontální čáry (řádky) s tučnými každou x-tou
     for i in range(radky + 1):
-        tloustka = 3 if i % gamesize == 0 else 1  # Tučná pro i=0, x, 2x, ...
+        tloustka = 3 if i % gamesize == 0 else 1
         ax.axhline(i, lw=tloustka, color='black')
 
-    # Nakresli vertikální čáry (sloupce) s tučnými každou x-tou
+
     for j in range(sloupce + 1):
-        tloustka = 3 if j % gamesize == 0 else 1  # Tučná pro j=0, x, 2x, ...
+        tloustka = 3 if j % gamesize == 0 else 1
         ax.axvline(j, lw=tloustka, color='black')
 
-    # Přidej text do středu každé buňky
+
     for i in range(radky):
         for j in range(sloupce):
-            symbol = str(np_game_matrix[i, j]) if np_game_matrix[i, j] != " " else ""  # Mezera se zobrazí prázdná
+            symbol = str(np_game_matrix[i, j]) if np_game_matrix[i, j] != " " else ""
             ax.text(j + 0.5, i + 0.5, symbol, ha='center', va='center', fontsize=12)
 
-    # Skryj osy
     ax.set_xticks([])
     ax.set_yticks([])
 
@@ -240,10 +258,12 @@ def show_game_matrix(game_matrix, gamesize):
 # If run as a file execute: else if added as module it will be skipped
 if __name__ == '__main__':
     # Number of squares on each axis (3 would create 9x9 square with squares of 3x3)
-    GAME_SIZE = 3
+    GAME_SIZE = 5
     game_mode = "medium" #easy, medium, hard
 
+
     solution = create_game_matrix_solution2(GAME_SIZE)
+    show_game_matrix(solution, GAME_SIZE)
     print(solution)
 
 

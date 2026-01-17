@@ -10,7 +10,7 @@ def display_matrix(matrix, parent, range_values=(1, 9)):
         return
 
     size = len(matrix)  # Square matrix
-    cell_size = 50  # Pixel size of each cell
+    cell_size = 25  # Pixel size of each cell
     y = int(math.sqrt(range_values[1]))  # Block size, e.g., 3 for 9x9 Sudoku
 
     # Create canvas for the grid
@@ -100,7 +100,7 @@ def new_game(root, parent,SIZE):
         if isinstance(widget, tk.Canvas):
             widget.destroy()
 
-    current_matrix = sudoku.create_game_matrix(sudoku.create_game_matrix_solution(SIZE),"hard")
+    current_matrix = sudoku.create_game_matrix(sudoku.create_game_matrix_solution2(SIZE),"hard")
     display_matrix(current_matrix, parent, range_values=(1, SIZE * SIZE))
     window_size = (SIZE ** 2) * 75
     root.geometry(f"{window_size}x{window_size}")

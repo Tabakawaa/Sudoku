@@ -7,8 +7,8 @@ root = tk.Tk()
 root.title("Sudoku!")
 
 # Game size 3 -> 9x9
-SIZE = 3
-window_size = (SIZE ** 2) * 50
+SIZE = 2
+window_size = (SIZE * 1.5) * 25
 
 root.geometry(f"{int(window_size*4/3)}x{int(window_size*3/4)}")
 mainframe = tk.Frame(root)
