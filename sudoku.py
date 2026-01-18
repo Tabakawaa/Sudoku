@@ -28,7 +28,7 @@ def square_protection(num, j, k, game_matrix, game_size):
             for column in range(square[1], square[3]+1):
                 try:
                     if num == game_matrix[row][column]:
-                        print(f"Square protection is True for {num} at square {square}")
+                        #print(f"Square protection is True for {num} at square {square}")
                         return True
                 except:
                     rest_empty = True
@@ -42,14 +42,14 @@ def column_protection(num, column, game_matrix):
         return False
     for row in game_matrix:
         if num == row[column]:
-            print(f"Column protection is True for {num} at column {column}")
+            #print(f"Column protection is True for {num} at column {column}")
             return True
     else:
         return False
 
 def row_protection(num, rowlist):
     if num in rowlist:
-        print(f"Row protection is True for {num} at row {rowlist}")
+        #print(f"Row protection is True for {num} at row {rowlist}")
         return True
     else:
         return False
@@ -72,7 +72,7 @@ def create_game_matrix_solution(game_size):
                 try:
                     num = random.choice([l for l in range(1, y_size+1) if l not in exclude_num])
                 except:
-                    print(f"RunOutOfExcludedNumbersError: Trying this row again:{j}")
+                    #print(f"RunOutOfExcludedNumbersError: Trying this row again:{j}")
                     k=0
                     attempt = attempt + 1
                     if attempt == (game_size**2) * 2:
@@ -112,9 +112,16 @@ def create_game_matrix_solution2(game_size):
     y = 0
     exclude_num = [0]
     extra_attempts = 0
+    master_attempt = 0
+    delete_rows_of_squares = 0
     new_square = False
     while game_matrix[size-1][size-1] == "x":
-        print(f"I'm inside while!")
+        if x < 0:
+            x = 0
+        if y < 0:
+            y = 0
+        print(f"current row {y} is {game_matrix[y]}")
+        print(f"and row 0 is {game_matrix[0]}")
         num_not_in_place = True
         if new_square:
             attempts = 0
@@ -125,13 +132,16 @@ def create_game_matrix_solution2(game_size):
         attempts = 0
         while num_not_in_place:
             square_location = square_detection(y, x, game_size)
-            print(f"I'm inside while num_not_in_place!")
+            #print(f"I'm inside while num_not_in_place!")
 
             if not square_protection(num,y,x,game_matrix,game_size) and not row_protection(num,game_matrix[y]) and not column_protection(num,x,game_matrix):
-                print(f"I'm inside if not!")
+                #print(f"I'm inside if not!")
                 num_not_in_place = False
                 game_matrix[y][x] = num
                 exclude_num.append(num)
+
+                if x == 0 and y == 0:
+                    delete_rows_of_squares = 0
 
                 if y == square_location[2] and x == square_location[3]:
                     if square_location[3] == size - 1:
@@ -166,15 +176,34 @@ def create_game_matrix_solution2(game_size):
                             y = square_location[0]
                     attempts = 0
                     extra_attempts = extra_attempts + 1
-                    if extra_attempts > size:
 
-                        for i in range(square_location[0], square_location[2] + 1):
+                if extra_attempts > size:
+                    #delete entire row of squares
+                    #TODO: This should be done for more rows of squares
+                    # (I assume something like if in last row delete floor(size/2) - 1 rows?
+                    if square_location[0] - game_size * delete_rows_of_squares >= 0:
+                        for i in range(square_location[0] - game_size * delete_rows_of_squares, square_location[2] + 1):
                             for j in range(size):
                                 game_matrix[i][j] = "x"
-                                x = 0
-                                y = square_location[0]
-                        extra_attempts = 0
-                    exclude_num = [0]
+                        x = 0
+                        y = square_location[0] - game_size * delete_rows_of_squares
+                    else:
+                        for i in range(square_location[2] + 1):
+                            for j in range(size):
+                                game_matrix[i][j] = "x"
+                        x = 0
+                        y = 0
+
+                    extra_attempts = 0
+                    master_attempt = master_attempt + 1
+                    print(f"Master attempt: {master_attempt}")
+
+                    if master_attempt == 10:
+                        delete_rows_of_squares = delete_rows_of_squares + 1
+                        master_attempt = 0
+                        print(f"Master attempt = 10")
+                        print(f"deleting {delete_rows_of_squares} rows of squares")
+                exclude_num = [0]
 
     return game_matrix
 
