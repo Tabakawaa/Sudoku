@@ -168,7 +168,7 @@ def create_game_matrix_solution2(game_size):
                 #TODO: Add special exclude list for each protection
                 num = random.choice([z for z in range(1, size + 1) if z not in exclude_num])
                 attempts = attempts + 1
-                if attempts > size * 3:
+                if attempts > size * size:
                     for i in range(square_location[0], square_location[2] + 1):
                         for j in range(square_location[1], square_location[3] + 1):
                             game_matrix[i][j] = "x"
@@ -177,7 +177,7 @@ def create_game_matrix_solution2(game_size):
                     attempts = 0
                     extra_attempts = extra_attempts + 1
 
-                if extra_attempts > size:
+                if extra_attempts > size*np.sqrt(size):
                     #delete entire row of squares
                     #TODO: This should be done for more rows of squares
                     # (I assume something like if in last row delete floor(size/2) - 1 rows?
